@@ -8,13 +8,15 @@ After downloading, simply edit the HTML and CSS files included with the template
 
 # Scoring
 
-- If one predicts the score and the winner correctly, that person gets 3-points.
-- If one predicts the winner only that person is awared 1-point.
+- If one predicts the winner correctly, that person gets 3-points.
+- One out of all the participants who predicts the closest margin by which candidate will be awarded 1-point.
 
 # Preview
+
 **[View Live Preview](https://kotas007.github.io/betkelec/)**
 
 # To do
+
 - Automate the input prediction collection.
 - Automate the download of the results from election commission website.
 
