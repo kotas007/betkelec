@@ -12,8 +12,8 @@ var resultsURL = "https://fabrikamsa01.blob.core.windows.net/learning/_data/pred
 var predictionDataURL = "https://fabrikamsa01.blob.core.windows.net/learning/_data/results.csv";
 
 //local testing
-resultsURL = "/_data/results.csv";
-predictionDataURL = "/_data/predict.csv";
+// resultsURL = "/_data/results.csv";
+// predictionDataURL = "/_data/predict.csv";
 
 var totalPredictionParticipant = 6;
 
