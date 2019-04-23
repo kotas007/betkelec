@@ -8,14 +8,14 @@ var printStepChecked = false;
 var matchResults = null;
 
 //published URL
-var resultsURL = "https://fabrikamsa01.blob.core.windows.net/learning/_data/predict.csv";
-var predictionDataURL = "https://fabrikamsa01.blob.core.windows.net/learning/_data/results.csv";
+var resultsURL = "https://predictapp.blob.core.windows.net/data/results.csv?1.0";
+var predictionDataURL = "https://predictapp.blob.core.windows.net/data/predict.csv?1.0";
 
 //local testing
-// resultsURL = "/_data/results.csv";
-// predictionDataURL = "/_data/predict.csv";
+//resultsURL = "http://192.168.1.7:8080/_data/results.csv?1.1";
+//predictionDataURL = "http://192.168.1.7:8080/_data/predict.csv?1.1";
 
-var totalPredictionParticipant = 6;
+var totalPredictionParticipant = 7;
 
 var matchStages = [
   //Kerala election stage & all gets completed in 1-stage.
@@ -140,12 +140,12 @@ function completePredictFn(results) {
 
       //add name
       theadth = document.createElement('th');
-      theadth.textContent = row[3];
+      theadth.textContent = "Participant";
       theadrow.appendChild(theadth);
 
       //add prediction
       theadth = document.createElement('th');
-      theadth.textContent = "Predict";
+      theadth.textContent = "Predict [Margin]";
       theadrow.appendChild(theadth);
 
       //add prediction
@@ -165,6 +165,7 @@ function completePredictFn(results) {
       // }
 
       var currentMatchNo = row[predictionKeyValue.ConstituencyId];
+      if ( currentMatchNo == null) continue;
       if (lastMatchNo != currentMatchNo) {
         newMatch = true;
         isUpcoming = false;
@@ -182,7 +183,10 @@ function completePredictFn(results) {
       }
 
       //name
-      var participantName = row[predictionKeyValue.ParticipantName].trim();
+      var participantName = "";
+      if ( row[predictionKeyValue.ParticipantName] ) {
+        participantName = row[predictionKeyValue.ParticipantName].trim();
+      }
       if (!"".localeCompare(participantName)) {
         continue;
       }
@@ -193,10 +197,6 @@ function completePredictFn(results) {
       //add match#
       var tbdytdName = null;
       if (newMatch) {
-        tbdytdName = document.createElement('td');
-        tbdytdName.textContent = currentMatchNo;
-        tbdytdName.setAttribute('rowspan', '6');
-
         //actual result
         var resultString = "";
         var matchResult = matchResults[currentMatchNo];
@@ -209,10 +209,10 @@ function completePredictFn(results) {
         var matchComplete = false;
         if (!"Complete".localeCompare(resultStatus)) {
           var winner = "";
-          resultString = "<b>" + winnerName + "(" +  winnerMargin + ")</b> ";
+          resultString = "<b>" + winnerName + "[" +  winnerMargin + "]</b> ";
           matchComplete = true;
         } else {
-          resultString = resultConstituency + "results announce  on " + resultStatus;
+          resultString = resultConstituency + " results on " + resultStatus;
           var matchDateDiff = Math.abs(Date.parse(resultStatus.trim()) - new Date());
           var diffDays = Math.ceil(matchDateDiff / (1000 * 3600 * 24));
           if (diffDays <= 32) {
@@ -221,7 +221,7 @@ function completePredictFn(results) {
         }
         tbdytdName = document.createElement('td');
         tbdytdName.innerHTML = resultString;
-        tbdytdName.setAttribute('rowspan', '6');
+        tbdytdName.setAttribute('rowspan', totalPredictionParticipant);
         tbdytr.appendChild(tbdytdName);
       }
 
@@ -236,7 +236,7 @@ function completePredictFn(results) {
       var predictWinnerName = row[3];
       var predictWinnerMargin = row[4];
 
-      var predictString = "<b>" + predictWinnerName + "(" + predictWinnerMargin + ")</b>";
+      var predictString = "<b>" + predictWinnerName + "[" + predictWinnerMargin + "]</b>";
       tbdytdName = document.createElement('td');
       tbdytdName.innerHTML = predictString;
       tbdytr.appendChild(tbdytdName);
