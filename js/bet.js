@@ -12,7 +12,7 @@ var resultsURL = "https://predictapp.blob.core.windows.net/data/results.csv?1.0"
 var predictionDataURL = "https://predictapp.blob.core.windows.net/data/predict.csv?1.0";
 
 //local testing
-//resultsURL = "http://192.168.1.7:8080/_data/results.csv?1.1";
+//resultsURL = "http://192.168.1.7:8080/_data/results.csv?1.2";
 //predictionDataURL = "http://192.168.1.7:8080/_data/predict.csv?1.1";
 
 var totalPredictionParticipant = 7;
@@ -25,7 +25,7 @@ var matchStages = [
     StageStartDate: 'Apr 23, 2019',
     StageEndDate: 'May 23, 2019',
     Stage: 1,
-    ScoreAndWinnerPoints: 4,
+    ScoreAndWinnerPoints: 1,
     WinnerOnlyPoints: 3,
     LostPoints: 0
   }
@@ -121,6 +121,15 @@ function completePredictFn(results) {
   var lastMatchNo = 0;
   var newMatch = false;
   var isUpcoming = false;
+  var newMarginWinner= {
+    Participant: [],
+    Diff: null,
+    CurrPoint: [],
+    Element: []
+  };
+  var winnerName = null;
+  var winnerMargin = null;
+
   for (var i = 0; i < results.data.length; i++) {
     var row = results.data[i];
     
@@ -169,6 +178,26 @@ function completePredictFn(results) {
       if (lastMatchNo != currentMatchNo) {
         newMatch = true;
         isUpcoming = false;
+
+        //while looping through & when constituency changes
+        //check for the winner
+        var curNewMarginWinnerParticipant = null;
+        while ( curNewMarginWinnerParticipant = newMarginWinner.Participant.pop() ) {
+          leaderboardPredictScorePlusWinnerGameCount[curNewMarginWinnerParticipant] += matchStages[currentMatchStage].ScoreAndWinnerPoints;
+          leaderboard[curNewMarginWinnerParticipant] += matchStages[currentMatchStage].ScoreAndWinnerPoints;
+          newMarginWinner.Element.pop().innerHTML = '<i class="fas fa-angle-double-up" style="color:#32CD32;"></i>' 
+            + Math.abs(matchStages[currentMatchStage].ScoreAndWinnerPoints+newMarginWinner.CurrPoint.pop());
+        }
+
+        //reset for every constituency
+        newMarginWinner = {
+          Participant: [],
+          Diff: null,
+          CurrPoint: [],
+          Element: []
+        };
+        winnerName = null;
+        winnerMargin = null;
       } else {
         newMatch = false;
       }
@@ -203,12 +232,11 @@ function completePredictFn(results) {
 
         var resultConstituency = matchResult[1];
         var resultStatus = matchResult[2];
-        var winnerName = matchResult[3];
-        var winnerMargin = matchResult[4];
+        winnerName = matchResult[3];
+        winnerMargin = matchResult[4];
       
         var matchComplete = false;
         if (!"Complete".localeCompare(resultStatus)) {
-          var winner = "";
           resultString = "<b>" + winnerName + "[" +  winnerMargin + "]</b> ";
           matchComplete = true;
         } else {
@@ -236,19 +264,18 @@ function completePredictFn(results) {
       var predictWinnerName = row[3];
       var predictWinnerMargin = row[4];
 
-      var predictString = "<b>" + predictWinnerName + "[" + predictWinnerMargin + "]</b>";
-      tbdytdName = document.createElement('td');
-      tbdytdName.innerHTML = predictString;
-      tbdytr.appendChild(tbdytdName);
+      var predictString = predictWinnerName + " [" + predictWinnerMargin + "]";
 
       //points
       var predictPoints = matchStages[currentMatchStage].LostPoints;
-      if ((winnerName == predictWinnerName) &&
-        (winnerMargin == predictWinnerMargin)) {
-        predictPoints = matchStages[currentMatchStage].ScoreAndWinnerPoints;
-      } else if ((winnerName == predictWinnerName)) {
+      if (winnerName == predictWinnerName) {
         predictPoints = matchStages[currentMatchStage].WinnerOnlyPoints;
+        predictString = "<b>" + predictWinnerName + " [" + predictWinnerMargin + "]</b>";
       }
+
+      tbdytdName = document.createElement('td');
+      tbdytdName.innerHTML = predictString;
+      tbdytr.appendChild(tbdytdName);
 
       tbdytdName = document.createElement('td');
       if (matchComplete) {
@@ -263,22 +290,41 @@ function completePredictFn(results) {
         }
 
         leaderboard[participantName] += predictPoints;
+        leaderboardPredictMatchesWinner[participantName].push(predictString);
 
         if (predictPoints >= matchStages[currentMatchStage].WinnerOnlyPoints) {
           leaderboardPredictWinnerGameCount[participantName] += 1;
-          leaderboardPredictMatchesWinner[participantName].push(predictString);
           tbdytdName.innerHTML = '<i class="fas fa-angle-up" style="color:#32CD32;"></i>' + Math.abs(predictPoints);
-        }
 
-        if (predictPoints == matchStages[currentMatchStage].ScoreAndWinnerPoints) {
-          leaderboardPredictScorePlusWinnerGameCount[participantName] += 1;
-          leaderboardPredictMatchesScorePlusWinner[participantName].push(predictString);
-          tbdytdName.innerHTML = '<i class="fas fa-angle-double-up" style="color:#32CD32;"></i>' + Math.abs(predictPoints);
+          var predictDiff = Math.abs(predictWinnerMargin-winnerMargin);
+
+          //store the prediction winner who has lowest difference across other participant details
+          if ( (newMarginWinner.Participant.length == 0) || (predictDiff <= newMarginWinner.Diff)) {
+            if ( predictDiff < newMarginWinner.Diff ) {
+              //new lower score
+              newMarginWinner.Diff = predictDiff;
+
+              //clear old
+              newMarginWinner.Participant = [];              
+              newMarginWinner.CurrPoint = [];
+              newMarginWinner.Element = [];
+
+              //set new participant
+              newMarginWinner.Participant.push(participantName);              
+              newMarginWinner.CurrPoint.push(predictPoints);
+              newMarginWinner.Element.push(tbdytdName);
+            } else {
+              //same score
+              newMarginWinner.Diff = predictDiff;
+              newMarginWinner.Participant.push(participantName);
+              newMarginWinner.CurrPoint.push(predictPoints);
+              newMarginWinner.Element.push(tbdytdName);
+            }
+          }
         }
 
         if (predictPoints == matchStages[currentMatchStage].LostPoints) {
           leaderboardPredictLossesGameCount[participantName] += 1;
-          leaderboardPredictMatchesLost[participantName].push(predictString);
           tbdytdName.innerHTML = '<i class="fas fa-angle-down" style="color:#DC143C;"></i>' + Math.abs(predictPoints);
         }
 
@@ -301,6 +347,18 @@ function completePredictFn(results) {
       }
 
       location.hash = "features";
+    }
+  }
+
+  //after looping the last line, if there isn't a new line at the EOF
+  //check for the winner
+  {
+    var curNewMarginWinnerParticipant = null;
+    while ( curNewMarginWinnerParticipant = newMarginWinner.Participant.pop() ) {
+    leaderboardPredictScorePlusWinnerGameCount[curNewMarginWinnerParticipant] += matchStages[currentMatchStage].ScoreAndWinnerPoints;
+    leaderboard[curNewMarginWinnerParticipant] += matchStages[currentMatchStage].ScoreAndWinnerPoints;
+    newMarginWinner.Element.pop().innerHTML = '<i class="fas fa-angle-double-up" style="color:#32CD32;"></i>' 
+      + Math.abs(matchStages[currentMatchStage].ScoreAndWinnerPoints+newMarginWinner.CurrPoint.pop());
     }
   }
 
@@ -447,11 +505,11 @@ function createLeaderBoard1(leaderboard,
 
     var tpoint1 = document.createElement('td');
     tpoint1.innerHTML = leaderboard[pName] +
-      "<div style=\"font-size: 0.8em\">(Predicted Score Matches: " +
+      "<div style=\"font-size: 0.8em\">(Predicted Winner + Margin: " +
       leaderboardPredictScorePlusWinnerGameCount[pName] +
-      ", Predicted Win Matches: " +
+      ", Predicted Winner: " +
       leaderboardPredictWinnerGameCount[pName] +
-      ", Predicted Fail Matches: " +
+      ", Prediction Failed: " +
       leaderboardPredictLossesGameCount[pName] +
       ")</div>";
 
