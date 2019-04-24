@@ -240,7 +240,7 @@ function completePredictFn(results) {
           resultString = "<b>" + winnerName + "[" +  winnerMargin + "]</b> ";
           matchComplete = true;
         } else {
-          resultString = resultConstituency + " results on " + resultStatus;
+          resultString = resultConstituency;// + " results on " + resultStatus;
           var matchDateDiff = Math.abs(Date.parse(resultStatus.trim()) - new Date());
           var diffDays = Math.ceil(matchDateDiff / (1000 * 3600 * 24));
           if (diffDays <= 32) {
