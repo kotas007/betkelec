@@ -415,7 +415,7 @@ function completePredictFn(results) {
       leaderboardPredictMatchesScorePlusWinner,
       leaderboardPredictMatchesWinner,
       leaderboardPredictMatchesLost,
-      sortedLeaderboard));      
+      sortedLeaderboard));   
   } else if ($("#featuredetails").exists()) {
     $("#featuredetails").remove();
   }
@@ -444,6 +444,7 @@ function completePredictFn(results) {
   enableButton();
 
   console.log("    Prediction paring complete", results);
+  document.getElementById('features').scrollIntoView();
 }
 
 function createLeaderBoard1(leaderboard,
