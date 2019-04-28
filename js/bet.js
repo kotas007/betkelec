@@ -7,15 +7,7 @@ var pauseChecked = false;
 var printStepChecked = false;
 var matchResults = null;
 
-//published URL
-var resultsURL = "https://predictapp.blob.core.windows.net/data/results.csv?1.0";
-var predictionDataURL = "https://predictapp.blob.core.windows.net/data/predict.csv?1.0";
-
-//local testing
-//resultsURL = "http://192.168.1.7:8080/_data/results.csv?1.2";
-//predictionDataURL = "http://192.168.1.7:8080/_data/predict.csv?1.1";
-
-var totalPredictionParticipant = 7;
+var totalPredictionParticipant = 8;
 
 var matchStages = [
   //Kerala election stage & all gets completed in 1-stage.
@@ -674,27 +666,6 @@ function updateLeaderBoardCatalog(currentMatchNo, participantName, predictPoints
 }
 
 
-function buildPredictConfig() {
-  return {
-    delimiter: $('#delimiter').val(),
-    newline: getLineEnding(),
-    header: $('#header').prop('checked'),
-    dynamicTyping: $('#dynamicTyping').prop('checked'),
-    preview: parseInt($('#preview').val() || 0),
-    step: $('#stream').prop('checked') ? stepFn : undefined,
-    encoding: $('#encoding').val(),
-    worker: $('#worker').prop('checked'),
-    comments: $('#comments').val(),
-    complete: completePredictFn,
-    error: errorFn,
-    download: true,
-    fastMode: $('#fastmode').prop('checked'),
-    skipEmptyLines: $('#skipEmptyLines').prop('checked'),
-    chunk: $('#chunk').prop('checked') ? chunkFn : undefined,
-    beforeFirstChunk: undefined,
-  };
-}
-
 //invoked when you click the button
 $(function () {
   $('#features').ready(function () {
@@ -709,22 +680,21 @@ $(function () {
 
     disableButton();
 
-    //parse results file
-    var rConfig = buildResultsConfig();
-    Papa.parse(
-      resultsURL,
-      rConfig);
-    if (rConfig.worker || rConfig.download)
-      console.log("Results parsing running...");
+    {
+      //parse results file
+      var rConfig = buildResultsConfig();
+      var eResults = Papa.parse(electionResults, rConfig)
+      if (!eResults)
+        console.log("Results parsing running...");
+    }
 
-    //parse prediction file
-    var pConfig = buildPredictConfig();
-    Papa.parse(
-       predictionDataURL,
-       pConfig);
-    
-       if (pConfig.worker || pConfig.download)
-       console.log("Prediction parsing running...");
+    {
+      //parse prediction file
+      var pConfig = buildPredictConfig();
+      var ePrediction = Papa.parse(predictionByParticipants,pConfig);
+      if (!ePrediction)
+        console.log("Prediction parsing running...");
+    }
     
   });
 });
@@ -738,11 +708,32 @@ function buildResultsConfig() {
     preview: parseInt($('#preview').val() || 0),
     step: $('#stream').prop('checked') ? stepFn : undefined,
     encoding: $('#encoding').val(),
-    worker: $('#worker').prop('checked'),
+    worker: false,
     comments: $('#comments').val(),
     complete: completeResultsFn,
     error: errorFn,
-    download: true,
+    download: false,
+    fastMode: $('#fastmode').prop('checked'),
+    skipEmptyLines: $('#skipEmptyLines').prop('checked'),
+    chunk: $('#chunk').prop('checked') ? chunkFn : undefined,
+    beforeFirstChunk: undefined,
+  };
+}
+
+function buildPredictConfig() {
+  return {
+    delimiter: $('#delimiter').val(),
+    newline: getLineEnding(),
+    header: $('#header').prop('checked'),
+    dynamicTyping: $('#dynamicTyping').prop('checked'),
+    preview: parseInt($('#preview').val() || 0),
+    step: $('#stream').prop('checked') ? stepFn : undefined,
+    encoding: $('#encoding').val(),
+    worker: false,
+    comments: $('#comments').val(),
+    complete: completePredictFn,
+    error: errorFn,
+    download: false,
     fastMode: $('#fastmode').prop('checked'),
     skipEmptyLines: $('#skipEmptyLines').prop('checked'),
     chunk: $('#chunk').prop('checked') ? chunkFn : undefined,

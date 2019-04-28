@@ -1,4 +1,4 @@
-#,Constituency,Status,Winner-Name,Winner-Margin
+var electionResults=`#,Constituency,Status,Winner-Name,Winner-Margin
 1,Kasaragod,23 May 2019,,
 2,Kannur,23 May 2019,,
 3,Vadakara,23 May 2019,,
@@ -18,4 +18,4 @@
 17,Pathanamthitta,23 May 2019,,
 18,Kollam,23 May 2019,,
 19,Attingal,23 May 2019,,
-20,Thiruvananthapuram,23 May 2019,,
+20,Thiruvananthapuram,23 May 2019`;
