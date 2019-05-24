@@ -2,7 +2,7 @@
 Created this after going through the pain of building custom things to calculate the leaderboard during the Kerala Election 2019. This can be used as the dashboard for the social prediction between friends. The web pages are constructed using bootstrap design for using on mobile devices.
 
 # Usage
-I used Typeform to collect all the prediction scores from my friends and then uploaded them in the CSV files under `_data` folder. One file `predict.csv` captures the predictions by friends. Another file `results.csv` captures the outcome of the match results.
+I used Typeform to collect all the election prediction from my friends and then converted them in the CSV format under `js/predict.js` folder. Another file `js/results.js` captures the outcome of the election results.
 
 After downloading, simply edit the HTML and CSS files included with the template in your favorite text editor to make changes. These are the only files you need to worry about, you can ignore everything else! To preview the changes you make to the code, you can open the `index.html` file in your web browser.
 
@@ -27,4 +27,4 @@ After downloading, simply edit the HTML and CSS files included with the template
 - Parsing of CSV using [Papa parse](http://papaparse.com/)
 
 # Copyright and License
-Code released under the [MIT](https://github.com/anoobbacker/betwc/blob/master/LICENSE) license.
+Code released under the [MIT](https://github.com/kotas007/betkelec/blob/master/LICENSE) license.
